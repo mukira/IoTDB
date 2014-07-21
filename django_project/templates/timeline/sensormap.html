@@ -1,0 +1,58 @@
+{% extends "bases/base.html" %}
+
+<!-- 
+
+To do on this page:
+Make sensor names links to timestream?
+Make device names links to timestream?
+Select ALL of a certain category (ie - open)
+Check multiple sensors
+
+ALIGN CENTER, LAY GOOD CSS ON TOP, LAY ON JQUERY SORTING
+
+-->
+
+{% load staticfiles %}
+
+{% block title %}{{username}} Account{% endblock %}
+
+{% block css %}
+
+{% endblock %}
+
+{% block content %}
+
+<p>{{ username }}'s Devices and Sensors</p>
+
+<br /><br />
+
+<form action="">
+
+<center>
+<table style="width:800px">
+<thead>
+<tr>
+<th>Device Name</th>
+<th>Sensor Name</th>
+<th>Units</th>
+<td>See TimeStream</th>
+</thead>
+</tr>
+
+{% for sensor in sensors %}
+
+<tr>
+<td>{{sensor.sensor_name}}</td>
+<td>{{sensor.device_name}}</td>
+<td>{{sensor.units}}</td>
+<td><input type="checkbox" name="{{sensor.sensor_id}}" value="1">
+</tr>
+
+{% endfor %}
+
+</table>
+</center>
+
+</form>
+
+{% endblock %}

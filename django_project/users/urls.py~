@@ -1,0 +1,15 @@
+from django.contrib.auth.views import login, logout
+
+urlpatterns = patterns('',
+    # existing patterns here...
+    (r'^login/$',  login, name='login'),
+    (r'^logout/$', logout, name='login'),
+)
+
+# Url patterns to be appended to the "/auth/" prefix, only login and logout functionality for now
+#urlpatterns = patterns('users.views',
+#    url('^login/$', 'login', name='login'),
+#    url('^logout/$', 'logout', name='logout'),
+    #url(r'^find-friends/$', 'find_friends', name='find_friends'),
+    #url(r'^modify-friend/$', 'modify_friend', name='modify_friend'),
+#)

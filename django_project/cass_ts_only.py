@@ -1,0 +1,162 @@
+# -*- coding: utf-8 -*-
+''' 
+Tutorial for setting up Apache Cassandra using Datastax's Python Drivers
+
+'''
+
+# Do the import thing
+from cassandra.cluster import Cluster
+import time
+# Import logging with configuration
+import logging
+# Import the uuid function 
+from uuid import uuid1, UUID
+import pandas as pd
+import numpy as np
+import datetime 
+
+
+logging.basicConfig()
+
+# Instantiate the Log
+log = logging.getLogger()
+log.setLevel('INFO')
+
+# Error logging function attached to execute_asynch
+def log_errors(errors):
+    print errors
+
+# Result printing function attached to execute_asynch
+def do_nothing(results):
+    print "Written"
+
+# Class to create the a simple client object for cassandra
+class SimpleClient:
+    session = None
+    
+    # Function to drop a schema from storage
+    def drop_schema(self, keyspace):
+        log.info("dropping keyspace %s" % keyspace)
+        self.session.execute("DROP KEYSPACE " + keyspace)
+
+    
+    # Build cluster, retrieve metadata, connect to cluster, print results
+    def connect(self, nodes):
+        # Load this Cluster
+        cluster = Cluster(nodes)
+        # Grab the metadata for it
+        metadata = cluster.metadata
+        # Connect to the cluster
+        self.session = cluster.connect()
+        # Print cluster name 
+        log.info('Connected to cluster: ' + metadata.cluster_name)
+        for host in metadata.all_hosts():
+            # Print individual host information
+            log.info('Datacenter: %s; Host: %s; Rack: %s',
+                     host.datacenter, host.address, host.rack)
+                     
+    # Shut down the cluster object when finished with it
+    def close(self):
+        # Shut down the cluster
+        self.session.cluster.shutdown()
+        # Shut down the session
+        self.session.shutdown()
+        # Write out the result
+        log.info('Connection closed.')
+        
+    # Create a database schema
+    def create_schema(self):
+
+        # Create a new keyspace, simplex1, with a 3x replication of data
+        self.session.execute(""" 
+             CREATE KEYSPACE IoTDB WITH replication
+             = {'class':'SimpleStrategy', 'replication_factor':3};
+             """)
+
+        # Create a table to house the timstream info keyed by user, 
+        self.session.execute("""
+             CREATE TABLE IoTDB.timestream_by_day(
+                 sensor_id text,
+                 date text,
+                 event_time timestamp, 
+                 measurement double,
+                 PRIMARY KEY ((sensor_id, date), event_time),
+             )
+             WITH CLUSTERING ORDER BY (event_time DESC);
+        """)    
+
+        # Log database creation
+        log.info('IoTDB keyspace and table schema created.')
+    
+    # Function to add time series data
+    def add_data(self,sensor_id,event_times,measurements):
+        bound_statement = self.session.prepare("""
+            INSERT INTO iotdb.timestream_by_day
+            (sensor_id,date,event_time,measurement)
+            VALUES(?,?,?,?);
+        """)
+        for event_time, measurement in zip(event_times, measurements):
+            day = event_time.strftime("%Y%m%d")
+            response_future = self.session.execute_async(bound_statement.bind((
+                sensor_id, day, event_time, measurement))
+            )
+	    response_future.add_callbacks(do_nothing, log_errors)
+
+    # Function to query time series data for a single, whole day
+    def query_whole_day(self, sensor_id, day):
+        bound_statement = self.session.prepare("""
+            SELECT event_time, measurement 
+            FROM iotdb.timestream_by_day 
+            WHERE sensor_id=? AND date=?;
+        """)
+        rows = self.session.execute(bound_statement, (sensor_id,day,))
+        # If user is not found, return an error        
+        if not rows:
+            print('No sensor data for %s on %s' % (username,day,))
+        else:
+            log.info('Sensor data for %s found for %s' % (username,day,))
+            return [row for row in rows]
+
+
+"""LOOK INTO FUNCTION TO EXECUTE ASYNC QUERYING FOR MANY DAYS AT A TIME"""
+
+
+# Execute functions block calling threads until they finish execting. To avoid this, run asynchronously as below
+class AsynchronousExample(SimpleClient):
+    
+    # Function override for query_schema
+    def query_schema(self):
+        # Use execute_asynch instead of execute
+        response_future = self.session.execute_async("SELECT * FROM simplex1.songs;")
+        # Add two callback functions to response_future
+        response_future.add_callbacks(print_results, log_errors)
+    
+        
+# Module main function        
+def main():
+    
+    # Create the client object
+    client = SimpleClient()
+    
+    # Connect the client object to local host
+    client.connect(['127.0.0.1'])
+    client.drop_schema("IoTDB")
+    
+    # Create the keyspace and table schema
+    client.create_schema()
+
+    # Make sensor_id
+    sid = '63a97551-9973-4ccb-8db8-20a04f51203b'
+    base = datetime.datetime(2014,1,1,0,0,0)
+    event_times = np.array([base + datetime.timedelta(seconds=x) for x in range(0,100000)])
+    mu, sigma = 98.6, 0.1 # mean and standard deviation
+    measurements = np.random.normal(mu, sigma, 100000)
+    client.add_data(sid,event_times,measurements)
+    
+    # And close the client!
+    client.close()
+
+
+# Run the thing for fuck's sake
+if __name__ == "__main__":
+    main()

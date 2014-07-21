@@ -1,0 +1,48 @@
+INFO:root:Connected to cluster: Test Cluster
+INFO:root:Datacenter: datacenter1; Host: 127.0.0.1; Rack: rack1
+INFO:root:dropping keyspace IoTDB
+INFO:root:IoTDB keyspace and table schema created.
+Traceback (most recent call last):
+  File "cass_ts_only.py", line 162, in <module>
+    main()
+  File "cass_ts_only.py", line 154, in main
+    client.add_data(sid,event_times,measurements)
+  File "cass_ts_only.py", line 101, in add_data
+    sensor_id, day, event_time, measurement))
+  File "/usr/local/lib/python2.7/dist-packages/cassandra/cluster.py", line 1151, in execute_async
+    future.send_request()
+  File "/usr/local/lib/python2.7/dist-packages/cassandra/cluster.py", line 2104, in send_request
+    req_id = self._query(host)
+  File "/usr/local/lib/python2.7/dist-packages/cassandra/cluster.py", line 2130, in _query
+    connection = pool.borrow_connection(timeout=2.0)
+  File "/usr/local/lib/python2.7/dist-packages/cassandra/pool.py", line 323, in borrow_connection
+    if self.is_shutdown:
+KeyboardInterrupt
+INFO:root:Connected to cluster: Test Cluster
+INFO:root:Datacenter: datacenter1; Host: 127.0.0.1; Rack: rack1
+INFO:root:dropping keyspace IoTDB
+INFO:root:IoTDB keyspace and table schema created.
+WARNING:cassandra.cluster:Host 127.0.0.1 has been marked down
+ERROR:cassandra.cluster:Error preparing query:
+Traceback (most recent call last):
+  File "/usr/local/lib/python2.7/dist-packages/cassandra/cluster.py", line 1227, in prepare
+    query_id, column_metadata = future.result()
+  File "/usr/local/lib/python2.7/dist-packages/cassandra/cluster.py", line 2464, in result
+    raise self._final_exception
+NoHostAvailable: ('Unable to complete the operation against any hosts', {<Host: 127.0.0.1 datacenter1>: ConnectionShutdown('Connection to 127.0.0.1 is closed',)})
+Traceback (most recent call last):
+  File "cass_ts_only.py", line 162, in <module>
+    main()
+  File "cass_ts_only.py", line 154, in main
+    client.add_data(sid,event_times,measurements)
+  File "cass_ts_only.py", line 97, in add_data
+    """)
+  File "/usr/local/lib/python2.7/dist-packages/cassandra/cluster.py", line 1227, in prepare
+    query_id, column_metadata = future.result()
+  File "/usr/local/lib/python2.7/dist-packages/cassandra/cluster.py", line 2464, in result
+    raise self._final_exception
+cassandra.cluster.NoHostAvailable: ('Unable to complete the operation against any hosts', {<Host: 127.0.0.1 datacenter1>: ConnectionShutdown('Connection to 127.0.0.1 is closed',)})
+INFO:root:Connected to cluster: Test Cluster
+INFO:root:Datacenter: datacenter1; Host: 127.0.0.1; Rack: rack1
+INFO:root:dropping keyspace IoTDB
+INFO:root:IoTDB keyspace and table schema created.

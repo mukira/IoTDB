@@ -1,0 +1,44 @@
+{% extends "bases/base.html" %}
+
+{% load staticfiles %}
+
+{% block title %}Login - {{ block.super }}{% endblock %}
+
+{% block css %}
+<link href="{% static "css/960.css" %}" rel="stylesheet" type="text/css" media="all" />
+{% endblock %}
+
+{% block content %}
+    <!--<div class="loginout">-->
+        <div class="login" id="signin">
+	  <h1>Sign In</h1>
+            <form method="POST">{% csrf_token %}
+                <p><input type="text" id="id_username" maxlength="30" name="username" value="" placeholder="Username"></p>
+		<p><input type="password" id="id_password" name="password" value="" placeholder="Password"</p>
+		<p class="remember_me">
+		  <label>
+		    <input type="checkbox" name="remember_me" id="remember_me">Remember me on this computer</label>
+		</p>
+                <input type="hidden" name="kind" value="login" />
+                {% if next %}
+                    <input type="hidden" name="next" value="{{ next }}" />
+                {% endif %}
+                <p class="submit"><input type="submit" name="commit" value="Sign In" /></p>
+            </form>
+        </div>
+    
+        <!--<div class="login" id="signup">
+            <h1>Create New Account</h1>
+            <form method="POST">{% csrf_token %}
+                <ul>
+                    {{ register_form.as_ul }}
+                </ul>
+                <input type="hidden" name="kind" value="register" />
+                {% if next %}
+                    <input type="hidden" name="next" value="{{ next }}" />
+                {% endif %}
+                <input type="submit" value="Sign Up" />
+            </form>
+        </div>-->
+    <!--</div>-->
+{% endblock %}

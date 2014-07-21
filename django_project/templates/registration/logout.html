@@ -1,0 +1,16 @@
+{% extends "bases/base.html" %}
+
+{% load staticfiles %}
+
+{% block title %}Logged Out - {{ block.super }}{% endblock %}
+
+{% block css %}
+<!--<link href="{% static "css/960.css" %}" rel="stylesheet" type="text/css" media="all" />-->
+{% endblock %}
+
+{% block content %}
+    <div class="grid_9 alpha">
+        <h2 class="grid_4 suffix_5">You have been logged out</h2>
+        <p class="grid_6">Thanks for using IoTDB.</p>
+    </div>
+{% endblock %}
